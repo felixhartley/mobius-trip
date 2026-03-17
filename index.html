@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobius Trip — Book Tickets</title>
+  <meta name="description" content="Book tickets for Mobius Trip — An Improv Sci-Fi Comedy Experience. April 4 · Kadaigal Books, Bangalore.">
+  <meta property="og:title" content="Mobius Trip — An Improv Sci-Fi Comedy Experience">
+  <meta property="og:description" content="One audience story. Dozens of characters. Infinite possibilities. April 4 · Kadaigal Books, Bangalore.">
+
+  <!-- ═══ EmailJS SDK ═══ -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    (function() {
+      emailjs.init("YOUR_EMAILJS_PUBLIC_KEY"); // ← Replace with your EmailJS public key
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg:             #09090f;
+      --surface:        #0e0e19;
+      --card:           #13131f;
+      --accent:         #e8783a;
+      --accent-dim:     rgba(232,120,58,0.1);
+      --accent-border:  rgba(232,120,58,0.25);
+      --text:           #f0ebe0;
+      --text-secondary: #8a8a9e;
+      --text-muted:     #4e4e66;
+      --border:         rgba(255,255,255,0.06);
+      --input-bg:       rgba(255,255,255,0.03);
+      --error:          #e85a5a;
+      --success:        #5ac47e;
+      --radius:         14px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── Stars canvas ─── */
+    #stars-canvas {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ─── Grain ─── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 1; opacity: 0.3;
+    }
+
+    /* ─── Nav ─── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      padding: 16px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(9,9,15,0.88);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand { display: flex; align-items: center; gap: 12px; }
+    .nav-logo {
+      width: 38px; height: 38px; background: var(--accent); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 17px;
+      box-shadow: 0 0 18px rgba(232,120,58,0.38);
+    }
+    .nav-name { font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 500; }
+    .nav-sub  { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+    .nav-badge {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.06em;
+      color: var(--accent); background: var(--accent-dim);
+      border: 1px solid var(--accent-border); padding: 4px 10px; border-radius: 20px;
+    }
+
+    /* ─── Page wrap ─── */
+    .page-wrap {
+      position: relative; z-index: 2;
+      max-width: 480px; margin: 0 auto;
+      padding: 0 20px 80px;
+    }
+
+    /* ─── Hero ─── */
+    .hero { padding: 48px 0 28px; animation: fadeUp 0.6s ease both; }
+    .hero-eyebrow {
+      font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--accent); font-weight: 500; margin-bottom: 18px;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(44px, 11vw, 58px);
+      line-height: 1.04; font-weight: 700; margin-bottom: 14px;
+    }
+    .hero-title em { font-style: italic; color: var(--accent); }
+    .hero-tagline { font-size: 15px; line-height: 1.7; color: var(--text-secondary); }
+
+    /* ─── Event meta ─── */
+    .event-meta { display: flex; flex-direction: column; gap: 10px; margin: 28px 0; animation: fadeUp 0.6s 0.08s ease both; }
+    .meta-card {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px; background: var(--card);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      transition: border-color 0.2s;
+    }
+    .meta-card:hover { border-color: var(--accent-border); }
+    .meta-icon {
+      width: 38px; height: 38px; background: var(--accent-dim); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+    }
+    .meta-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; }
+    .meta-value { font-size: 15px; font-weight: 500; }
+
+    /* ─── Divider ─── */
+    .glow-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, var(--accent) 50%, transparent 100%);
+      opacity: 0.28; margin: 28px 0;
+    }
+
+    /* ─── About ─── */
+    .about { animation: fadeUp 0.6s 0.14s ease both; }
+    .about p { font-size: 14px; line-height: 1.78; color: var(--text-secondary); margin-bottom: 14px; }
+    .about p strong { color: var(--text); font-weight: 500; }
+    .highlights {
+      display: flex; flex-direction: column; gap: 10px;
+      margin: 20px 0; padding: 18px;
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    }
+    .hl-item { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; }
+    .hl-item span:first-child { font-size: 20px; width: 28px; text-align: center; }
+    .about-outro {
+      font-size: 15px !important; color: var(--text) !important;
+      font-style: italic; font-family: 'Playfair Display', serif; line-height: 1.6 !important;
+    }
+
+    /* ─── Form section ─── */
+    .form-section { animation: fadeUp 0.6s 0.2s ease both; }
+    .section-heading { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 500; margin-bottom: 24px; }
+
+    .form-group { margin-bottom: 18px; }
+    .form-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+    .form-label .req { color: var(--accent); margin-left: 2px; }
+
+    .form-input {
+      width: 100%; padding: 14px 16px;
+      background: var(--input-bg); border: 1px solid var(--border);
+      border-radius: 12px; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 15px;
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+      -webkit-appearance: none;
+    }
+    .form-input::placeholder { color: var(--text-muted); }
+    .form-input:focus {
+      border-color: var(--accent);
+      background: rgba(232,120,58,0.04);
+      box-shadow: 0 0 0 3px rgba(232,120,58,0.08);
+    }
+    .form-input.is-error { border-color: var(--error); }
+    .field-error { font-size: 12px; color: var(--error); margin-top: 6px; display: none; }
+    .field-error.visible { display: block; }
+
+    /* ─── Ticket counter ─── */
+    .counter-row { display: flex; align-items: center; gap: 24px; margin-top: 10px; }
+    .counter-btn {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 1px solid var(--border); background: var(--card);
+      color: var(--text); font-size: 22px; font-weight: 300;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      line-height: 1; transition: all 0.18s; user-select: none;
+    }
+    .counter-btn:not(:disabled):hover { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+    .counter-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .counter-num { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; min-width: 36px; text-align: center; }
+
+    /* ─── Price box ─── */
+    .price-box {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 20px; background: var(--card);
+      border: 1px solid var(--accent-border); border-radius: var(--radius);
+      margin: 24px 0 18px;
+    }
+    .price-left { display: flex; align-items: center; gap: 10px; font-size: 15px; color: var(--text-secondary); }
+    .price-total { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--accent); }
+
+    /* ─── CTA button ─── */
+    .cta-btn {
+      width: 100%; padding: 18px 24px;
+      background: var(--accent); color: #fff; border: none;
+      border-radius: var(--radius);
+      font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500;
+      cursor: pointer; letter-spacing: 0.02em;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      position: relative; overflow: hidden;
+    }
+    .cta-btn::after {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .cta-btn:not(:disabled):hover { background: #cf6a2e; transform: translateY(-2px); box-shadow: 0 10px 28px rgba(232,120,58,0.36); }
+    .cta-btn:not(:disabled):active { transform: translateY(0); }
+    .cta-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    .terms-note { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 14px; }
+    .terms-note a { color: var(--accent); text-decoration: none; }
+    .terms-note a:hover { text-decoration: underline; }
+
+    /* ─── Spinner ─── */
+    .spinner {
+      display: inline-block; width: 15px; height: 15px;
+      border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+      border-radius: 50%; animation: spin 0.65s linear infinite;
+      vertical-align: middle; margin-right: 8px;
+    }
+
+    /* ─── Success state ─── */
+    .success-state {
+      display: none; padding: 48px 0 24px;
+      text-align: center; animation: fadeUp 0.6s ease both;
+    }
+    .success-glyph {
+      font-size: 68px; margin-bottom: 20px; display: block;
+      animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .success-title { font-family: 'Playfair Display', serif; font-size: 30px; font-weight: 700; margin-bottom: 10px; }
+    .success-subtitle { font-size: 15px; color: var(--text-secondary); line-height: 1.65; max-width: 300px; margin: 0 auto 28px; }
+
+    /* ─── Booking card ─── */
+    .booking-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden; margin-bottom: 24px; text-align: left;
+    }
+    .booking-card-header {
+      padding: 12px 18px; background: var(--accent-dim);
+      border-bottom: 1px solid var(--accent-border);
+      font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--accent); font-weight: 500;
+    }
+    .booking-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 14px;
+    }
+    .booking-row:last-child { border-bottom: none; }
+    .booking-key { color: var(--text-muted); }
+    .booking-val { font-weight: 500; }
+    .booking-val.accent { color: var(--accent); }
+
+    /* ─── UPI Payment section ─── */
+    .upi-section { margin-bottom: 28px; }
+    .upi-heading {
+      font-size: 13px; font-weight: 500; color: var(--text-secondary);
+      text-align: center; margin-bottom: 16px; letter-spacing: 0.03em;
+    }
+    .upi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+    .upi-btn {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 14px 8px; background: var(--card);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      cursor: pointer; transition: all 0.18s; color: var(--text); text-decoration: none;
+    }
+    .upi-btn:hover { border-color: var(--accent-border); background: var(--accent-dim); }
+    .upi-btn-icon { font-size: 26px; }
+    .upi-btn-label { font-size: 12px; font-weight: 500; }
+    .upi-any-btn {
+      width: 100%; padding: 13px; background: transparent;
+      border: 1px dashed var(--border); border-radius: var(--radius);
+      color: var(--text-secondary); font-family: 'DM Sans', sans-serif;
+      font-size: 13px; cursor: pointer; transition: all 0.18s;
+    }
+    .upi-any-btn:hover { border-color: var(--accent-border); color: var(--text); }
+    .upi-note { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 14px; line-height: 1.5; }
+
+    .success-outro { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+    /* ─── Animations ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.4); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 360px) {
+      .hero-title { font-size: 40px; }
+      .upi-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<!-- ══ Hidden iframe for Google Apps Script POST ══ -->
+<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+
+<!-- ══ NAV ══ -->
+<nav>
+  <div class="nav-brand">
+    <img src="mobiustrip_logo.png" alt="Mobius Trip" style="height:32px; filter: invert(1); opacity: 0.92;">
+  </div>
+  <div class="nav-badge">April 4</div>
+</nav>
+
+<!-- ══ PAGE ══ -->
+<div class="page-wrap">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-eyebrow">Improv · Sci-Fi · Comedy</div>
+    <img src="mobiustrip_logo.png" alt="Mobius Trip" style="width:100%; max-width:420px; filter:invert(1); opacity:0.93; margin-bottom:18px; display:block;">
+    <p class="hero-tagline">What happens when a single audience story spirals into an entire universe of characters, timelines, and unexpected twists?</p>
+  </section>
+
+  <!-- Event Meta -->
+  <div class="event-meta">
+    <div class="meta-card">
+      <div class="meta-icon">📅</div>
+      <div>
+        <div class="meta-label">Date</div>
+        <div class="meta-value">Friday, April 4</div>
+      </div>
+    </div>
+    <div class="meta-card">
+      <div class="meta-icon">📍</div>
+      <div>
+        <div class="meta-label">Venue</div>
+        <div class="meta-value">Kadaigal Books, Sahakar Nagar</div>
+      </div>
+    </div>
+    <div class="meta-card">
+      <div class="meta-icon">⏱️</div>
+      <div>
+        <div class="meta-label">Duration</div>
+        <div class="meta-value">One Hour · Completely Unscripted</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="glow-divider"></div>
+
+  <!-- About -->
+  <section class="about">
+    <p>Mobius Trip is a <strong>one-hour, completely unscripted improv comedy show</strong> where a single audience story explodes into an entire universe of characters, twists, and unexpected connections.</p>
+    <p>Performed by improv duo <strong>Kartik Shanbhag and Felix Hartley</strong>, the show unfolds live on stage as they build multiple storylines and characters on the spot — <strong>no script, no planning, just pure improvisation.</strong></p>
+    <p>Expect fast-paced comedy, strange coincidences, and a touch of sci-fi weirdness as timelines bend and stories loop back on themselves. With a combined <strong>10+ years of experience</strong> in improv comedy and theatre, Kartik and Felix turn one simple audience suggestion into a hilarious, unpredictable theatrical ride.</p>
+    <p>After two successful shows across Bangalore with <strong>100+ audience members</strong>, Mobius Trip returns for its third outing.</p>
+    <p class="about-outro">Catch the show April 4th at Kadaigal Books, Sahakarnagar — and who knows, your story might start the trip.</p>
+  </section>
+
+  <div class="glow-divider"></div>
+
+  <!-- ══ BOOKING FORM ══ -->
+  <section class="form-section" id="booking-section">
+    <h2 class="section-heading">Your Details</h2>
+
+    <div class="form-group">
+      <label class="form-label" for="inp-name">Name <span class="req">*</span></label>
+      <input type="text" id="inp-name" class="form-input" placeholder="Your full name" autocomplete="name">
+      <div class="field-error" id="err-name">Please enter your name</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="inp-phone">Phone Number <span class="req">*</span></label>
+      <input type="tel" id="inp-phone" class="form-input" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric" autocomplete="tel">
+      <div class="field-error" id="err-phone">Please enter a valid 10-digit number</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="inp-email">Email <span class="req">*</span></label>
+      <input type="email" id="inp-email" class="form-input" placeholder="your@email.com" autocomplete="email">
+      <div class="field-error" id="err-email">Please enter a valid email address</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Number of Tickets</label>
+      <div class="counter-row">
+        <button class="counter-btn" id="btn-dec" aria-label="Decrease" disabled>−</button>
+        <div class="counter-num" id="ticket-count">1</div>
+        <button class="counter-btn" id="btn-inc" aria-label="Increase">+</button>
+      </div>
+    </div>
+
+    <div class="price-box">
+      <div class="price-left">
+        <span>👥</span>
+        <span id="ticket-label">1 ticket</span>
+      </div>
+      <span class="price-total" id="total-display">₹499</span>
+    </div>
+
+    <button class="cta-btn" id="cta-btn">
+      Book Now — ₹<span id="cta-price">499</span>
+    </button>
+
+    <p class="terms-note">By booking, you agree to our <a href="#">Terms &amp; Conditions</a></p>
+  </section>
+
+  <!-- ══ SUCCESS STATE ══ -->
+  <div class="success-state" id="success-section">
+    <span class="success-glyph">🌀</span>
+    <h2 class="success-title">You're on the trip!</h2>
+    <p class="success-subtitle">Your booking is confirmed. Complete the payment below to secure your seat.</p>
+
+    <div class="booking-card">
+      <div class="booking-card-header">Booking Summary</div>
+      <div id="booking-details"></div>
+    </div>
+
+    <!-- UPI Payment -->
+    <div class="upi-section">
+      <p class="upi-heading">Complete your payment</p>
+      <div class="upi-grid">
+        <a class="upi-btn" id="upi-gpay" href="#" onclick="openUPI('gpay'); return false;">
+          <span class="upi-btn-icon">🟢</span>
+          <span class="upi-btn-label">GPay</span>
+        </a>
+        <a class="upi-btn" id="upi-phonepe" href="#" onclick="openUPI('phonepe'); return false;">
+          <span class="upi-btn-icon">🟣</span>
+          <span class="upi-btn-label">PhonePe</span>
+        </a>
+        <a class="upi-btn" id="upi-paytm" href="#" onclick="openUPI('paytm'); return false;">
+          <span class="upi-btn-icon">🔵</span>
+          <span class="upi-btn-label">Paytm</span>
+        </a>
+      </div>
+      <button class="upi-any-btn" onclick="openUPI('any')">Pay with any UPI app →</button>
+      <p class="upi-note">Send payment to <strong>YOUR_UPI_ID@bank</strong> with reference <span id="booking-ref-note"></span></p>
+    </div>
+
+    <p class="success-outro">Your story might just start the trip.<br>See you April 4 at Kadaigal Books! 🚀</p>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<script>
+  // ═══════════════════════════════════════════════════════
+  //  CONFIG — update these values before going live
+  // ═══════════════════════════════════════════════════════
+  const CONFIG = {
+    TICKET_PRICE:      499,               // ₹ per ticket
+    UPI_ID:            'YOUR_UPI_ID@bank', // e.g. kartik@okicici
+    UPI_NAME:          'Mobius Trip',
+    EVENT_NAME:        'Mobius Trip — April 4, Kadaigal Books',
+    GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzHbu5c5NEYQmRPZ8DLb97qo0Fp9umQc26j-WknM7xpA11B8BTScjrhSQ2e2BNitIUs/exec',
+    EMAILJS_SERVICE:   'YOUR_SERVICE_ID',
+    EMAILJS_TEMPLATE:  'YOUR_TEMPLATE_ID',
+    ORGANISER_EMAIL:   'YOUR_EMAIL@example.com', // receives a BCC
+  };
+  // ═══════════════════════════════════════════════════════
+
+  /* ── Static stars, slow camera zoom-in ── */
+  (function() {
+    const canvas = document.getElementById('stars-canvas');
+    const ctx    = canvas.getContext('2d');
+    const NUM    = 220;
+    let W, H, cx, cy;
+    let scale    = 1;
+    const ZOOM_SPEED = 0.00035;
+    const MAX_SCALE  = 1.6;
+    let stars = [];
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      cx = W / 2;
+      cy = H / 2;
+    }
+
+    function makeStars() {
+      stars = Array.from({ length: NUM }, () => ({
+        nx:      (Math.random() - 0.5) * 2.4,
+        ny:      (Math.random() - 0.5) * 2.4,
+        r:       Math.random() * 1.0 + 0.2,
+        opacity: Math.random() * 0.55 + 0.15,
+        twinkle: Math.random() * Math.PI * 2,
+      }));
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      scale += ZOOM_SPEED;
+      if (scale > MAX_SCALE) scale = 1;
+
+      const resetFade = scale > MAX_SCALE - 0.12
+        ? 1 - (scale - (MAX_SCALE - 0.12)) / 0.12
+        : Math.min((scale - 1) / 0.08, 1);
+
+      stars.forEach(s => {
+        const sx = cx + s.nx * (W / 2) * scale;
+        const sy = cy + s.ny * (H / 2) * scale;
+
+        if (sx < -10 || sx > W + 10 || sy < -10 || sy > H + 10) return;
+
+        const r = s.r * scale;
+
+        s.twinkle += 0.008;
+        const twinkleOp = s.opacity * (0.75 + 0.25 * Math.sin(s.twinkle));
+        const finalOp   = twinkleOp * resetFade;
+
+        if (s.opacity > 0.5) {
+          const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, r * 4);
+          glow.addColorStop(0, `rgba(220,210,190,${finalOp * 0.25})`);
+          glow.addColorStop(1, `rgba(220,210,190,0)`);
+          ctx.beginPath();
+          ctx.arc(sx, sy, r * 4, 0, Math.PI * 2);
+          ctx.fillStyle = glow;
+          ctx.fill();
+        }
+
+        ctx.beginPath();
+        ctx.arc(sx, sy, r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(240,232,215,${finalOp})`;
+        ctx.fill();
+      });
+
+      requestAnimationFrame(draw);
+    }
+
+    resize(); makeStars(); draw();
+    window.addEventListener('resize', resize);
+  })();
+
+  /* ── Helpers ── */
+  function fmt(n) { return n.toLocaleString('en-IN'); }
+  function istTimestamp() {
+    return new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+  }
+  function bookingId() {
+    return 'MT-' + Math.random().toString(36).substr(2,5).toUpperCase();
+  }
+
+  /* ── Ticket counter ── */
+  const PRICE = CONFIG.TICKET_PRICE;
+  let qty = 1;
+
+  const btnDec  = document.getElementById('btn-dec');
+  const btnInc  = document.getElementById('btn-inc');
+  const countEl = document.getElementById('ticket-count');
+  const labelEl = document.getElementById('ticket-label');
+  const totalEl = document.getElementById('total-display');
+  const ctaPrice= document.getElementById('cta-price');
+
+  function updateCounter() {
+    countEl.textContent = qty;
+    labelEl.textContent = qty === 1 ? '1 ticket' : `${qty} tickets`;
+    const total = qty * PRICE;
+    totalEl.textContent = `₹${fmt(total)}`;
+    ctaPrice.textContent = fmt(total);
+    btnDec.disabled = qty <= 1;
+    btnInc.disabled = qty >= 10;
+  }
+
+  btnDec.addEventListener('click', () => { qty = Math.max(1, qty - 1); updateCounter(); });
+  btnInc.addEventListener('click', () => { qty = Math.min(10, qty + 1); updateCounter(); });
+
+  /* ── Validation ── */
+  function setError(inputId, errId, show) {
+    document.getElementById(inputId).classList.toggle('is-error', show);
+    document.getElementById(errId).classList.toggle('visible', show);
+  }
+
+  function validate() {
+    const name  = document.getElementById('inp-name').value.trim();
+    const phone = document.getElementById('inp-phone').value.trim();
+    const email = document.getElementById('inp-email').value.trim();
+
+    const badName  = !name;
+    const badPhone = !/^\d{10}$/.test(phone);
+    const badEmail = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    setError('inp-name',  'err-name',  badName);
+    setError('inp-phone', 'err-phone', badPhone);
+    setError('inp-email', 'err-email', badEmail);
+
+    return !badName && !badPhone && !badEmail;
+  }
+
+  document.getElementById('inp-phone').addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '');
+  });
+
+  ['inp-name','inp-phone','inp-email'].forEach(id =>
+    document.getElementById(id).addEventListener('input', () =>
+      document.getElementById(id).classList.remove('is-error'))
+  );
+
+  /* ── Google Apps Script — fire-and-forget via hidden form ── */
+  function postToSheets(data) {
+    if (!CONFIG.GOOGLE_SCRIPT_URL || CONFIG.GOOGLE_SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL') return;
+
+    const form  = document.createElement('form');
+    form.method = 'POST';
+    form.action = CONFIG.GOOGLE_SCRIPT_URL;
+    form.target = 'hidden_iframe';
+    form.style.display = 'none';
+
+    const input = document.createElement('input');
+    input.type  = 'hidden';
+    input.name  = 'data';
+    input.value = JSON.stringify(data);
+
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+  }
+
+  /* ── EmailJS confirmation ── */
+  function sendConfirmationEmail(data) {
+    if (!CONFIG.EMAILJS_SERVICE || CONFIG.EMAILJS_SERVICE === 'YOUR_SERVICE_ID') return;
+
+    const params = {
+      customer_name:    data.name,
+      customer_email:   data.email,
+      customer_phone:   data.phone,
+      booking_id:       data.bookingId,
+      tickets:          data.tickets,
+      total:            '₹' + fmt(data.total),
+      event_name:       CONFIG.EVENT_NAME,
+      upi_id:           CONFIG.UPI_ID,
+      bcc_email:        CONFIG.ORGANISER_EMAIL,
+    };
+
+    emailjs.send(CONFIG.EMAILJS_SERVICE, CONFIG.EMAILJS_TEMPLATE, params)
+      .then(() => console.log('Confirmation email sent'))
+      .catch(err => console.error('Email error:', err));
+  }
+
+  /* ── UPI deep links ── */
+  let currentBookingTotal = 0;
+  let currentBookingId    = '';
+
+  function openUPI(platform) {
+    const upi  = CONFIG.UPI_ID;
+    const name = encodeURIComponent(CONFIG.UPI_NAME);
+    const amt  = currentBookingTotal;
+    const note = encodeURIComponent('Booking ' + currentBookingId);
+
+    const urls = {
+      gpay:    `gpay://upi/pay?pa=${upi}&pn=${name}&am=${amt}&cu=INR&tn=${note}`,
+      phonepe: `phonepe://pay?pa=${upi}&pn=${name}&am=${amt}&cu=INR&tn=${note}`,
+      paytm:   `paytmmp://pay?pa=${upi}&pn=${name}&am=${amt}&cu=INR&tn=${note}`,
+      any:     `upi://pay?pa=${upi}&pn=${name}&am=${amt}&cu=INR&tn=${note}`,
+    };
+
+    window.location.href = urls[platform] || urls.any;
+  }
+
+  /* ── Submit ── */
+  document.getElementById('cta-btn').addEventListener('click', () => {
+    if (!validate()) return;
+
+    const btn   = document.getElementById('cta-btn');
+    const name  = document.getElementById('inp-name').value.trim();
+    const phone = document.getElementById('inp-phone').value.trim();
+    const email = document.getElementById('inp-email').value.trim();
+    const total = qty * PRICE;
+    const bId   = bookingId();
+
+    btn.disabled  = true;
+    btn.innerHTML = '<span class="spinner"></span>Booking...';
+
+    const booking = {
+      bookingId:  bId,
+      name, phone, email,
+      tickets:    qty,
+      total,
+      event:      CONFIG.EVENT_NAME,
+      timestamp:  istTimestamp(),
+      status:     'Pending Payment',
+    };
+
+    // 1. Write to Google Sheet
+    postToSheets(booking);
+
+    // 2. Send confirmation email
+    sendConfirmationEmail(booking);
+
+    // 3. Store for UPI
+    currentBookingTotal = total;
+    currentBookingId    = bId;
+
+    // 4. Show success
+    document.getElementById('booking-section').style.display = 'none';
+
+    document.getElementById('booking-details').innerHTML = `
+      <div class="booking-row"><span class="booking-key">Booking ID</span><span class="booking-val accent">${bId}</span></div>
+      <div class="booking-row"><span class="booking-key">Name</span><span class="booking-val">${name}</span></div>
+      <div class="booking-row"><span class="booking-key">Phone</span><span class="booking-val">${phone}</span></div>
+      <div class="booking-row"><span class="booking-key">Email</span><span class="booking-val">${email}</span></div>
+      <div class="booking-row"><span class="booking-key">Tickets</span><span class="booking-val">${qty} × ₹${fmt(PRICE)}</span></div>
+      <div class="booking-row"><span class="booking-key">Total</span><span class="booking-val accent">₹${fmt(total)}</span></div>
+      <div class="booking-row"><span class="booking-key">Event</span><span class="booking-val">April 4 · Kadaigal Books</span></div>
+    `;
+
+    document.getElementById('booking-ref-note').textContent = `"${bId}"`;
+
+    const successEl = document.getElementById('success-section');
+    successEl.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>
+</body>
+</html>
