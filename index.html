@@ -703,6 +703,9 @@
       status:     'Pending Payment',
     };
 
+    // Record to Google Sheets immediately on Book Now
+    postToSheets(currentBooking);
+
     // Send confirmation email
     sendConfirmationEmail(currentBooking);
 
@@ -732,17 +735,12 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  /* ── I've Paid button — records to Google Sheets ── */
+  /* ── I've Paid button — just shows final confirmation screen ── */
   document.getElementById('paid-btn').addEventListener('click', () => {
     const btn = document.getElementById('paid-btn');
     btn.disabled  = true;
     btn.innerHTML = '<span class="spinner"></span>Confirming...';
 
-    // Record to Sheets with Payment Confirmed status
-    const confirmedBooking = { ...currentBooking, status: 'Payment Confirmed', paidAt: istTimestamp() };
-    postToSheets(confirmedBooking);
-
-    // Show final confirmation screen
     setTimeout(() => {
       document.getElementById('success-section').style.display  = 'none';
       document.getElementById('confirmed-section').style.display = 'block';
