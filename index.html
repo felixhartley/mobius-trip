@@ -321,6 +321,9 @@
 <!-- ══ PAGE ══ -->
 <div class="page-wrap">
 
+  <!-- ══ PRE-BOOKING CONTENT (hidden after Book Now) ══ -->
+  <div id="pre-booking">
+
   <!-- Hero -->
   <section class="hero">
     <div class="hero-eyebrow">Improv · Sci-Fi · Comedy</div>
@@ -409,8 +412,9 @@
       Book Now — ₹<span id="cta-price">499</span>
     </button>
 
-
   </section>
+
+  </div><!-- /pre-booking -->
 
   <!-- ══ SUCCESS STATE ══ -->
   <div class="success-state" id="success-section">
@@ -439,6 +443,12 @@
       <p class="upi-note">Send payment to <strong>YOUR_UPI_ID@bank</strong> with reference <span id="booking-ref-note"></span></p>
     </div>
 
+    <!-- I've Paid button -->
+    <button class="cta-btn" id="paid-btn" style="margin-bottom:10px;">
+      ✓ I've completed payment
+    </button>
+    <p style="text-align:center; font-size:12px; color:var(--text-muted); margin-bottom:28px;">Tap after you've paid to confirm your spot</p>
+
     <!-- Booking summary — below payment -->
     <div class="booking-card">
       <div class="booking-card-header">Booking Summary</div>
@@ -446,6 +456,18 @@
     </div>
 
     <p class="success-outro">Your story might just start the trip.<br>See you April 4 at Kadhaigal! 🚀</p>
+  </div>
+
+  <!-- ══ PAYMENT CONFIRMED STATE ══ -->
+  <div class="success-state" id="confirmed-section">
+    <span class="success-glyph">🎭</span>
+    <h2 class="success-title">See you there!</h2>
+    <p class="success-subtitle">Payment confirmed. Your seat is secured. We can't wait to see you on April 4th.</p>
+    <div class="booking-card">
+      <div class="booking-card-header">Your Booking</div>
+      <div id="confirmed-details"></div>
+    </div>
+    <p class="success-outro">See you April 4th at Kadhaigal, Sahakarnagar! 🚀</p>
   </div>
 
 </div><!-- /page-wrap -->
@@ -666,6 +688,8 @@
   }
 
   /* ── Submit ── */
+  let currentBooking = null;
+
   document.getElementById('cta-btn').addEventListener('click', () => {
     if (!validate()) return;
 
@@ -679,7 +703,7 @@
     btn.disabled  = true;
     btn.innerHTML = '<span class="spinner"></span>Booking...';
 
-    const booking = {
+    currentBooking = {
       bookingId:  bId,
       name, phone, email,
       tickets:    qty,
@@ -689,34 +713,51 @@
       status:     'Pending Payment',
     };
 
-    // 1. Write to Google Sheet
-    postToSheets(booking);
+    // Send confirmation email
+    sendConfirmationEmail(currentBooking);
 
-    // 2. Send confirmation email
-    sendConfirmationEmail(booking);
-
-    // 3. Store for UPI
+    // Store for UPI
     currentBookingTotal = total;
     currentBookingId    = bId;
 
-    // 4. Show success
-    document.getElementById('booking-section').style.display = 'none';
+    // Hide ALL pre-booking content
+    document.getElementById('pre-booking').style.display = 'none';
 
-    document.getElementById('booking-details').innerHTML = `
+    // Populate booking summary
+    const summaryHTML = `
       <div class="booking-row"><span class="booking-key">Booking ID</span><span class="booking-val accent">${bId}</span></div>
       <div class="booking-row"><span class="booking-key">Name</span><span class="booking-val">${name}</span></div>
       <div class="booking-row"><span class="booking-key">Phone</span><span class="booking-val">${phone}</span></div>
       <div class="booking-row"><span class="booking-key">Email</span><span class="booking-val">${email}</span></div>
       <div class="booking-row"><span class="booking-key">Tickets</span><span class="booking-val">${qty} × ₹${fmt(PRICE)}</span></div>
       <div class="booking-row"><span class="booking-key">Total</span><span class="booking-val accent">₹${fmt(total)}</span></div>
-      <div class="booking-row"><span class="booking-key">Event</span><span class="booking-val">April 4 · Kadaigal Books</span></div>
+      <div class="booking-row"><span class="booking-key">Event</span><span class="booking-val">April 4 · Kadhaigal</span></div>
     `;
-
+    document.getElementById('booking-details').innerHTML  = summaryHTML;
+    document.getElementById('confirmed-details').innerHTML = summaryHTML;
     document.getElementById('booking-ref-note').textContent = `"${bId}"`;
 
-    const successEl = document.getElementById('success-section');
-    successEl.style.display = 'block';
+    // Show payment screen
+    document.getElementById('success-section').style.display = 'block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  /* ── I've Paid button — records to Google Sheets ── */
+  document.getElementById('paid-btn').addEventListener('click', () => {
+    const btn = document.getElementById('paid-btn');
+    btn.disabled  = true;
+    btn.innerHTML = '<span class="spinner"></span>Confirming...';
+
+    // Record to Sheets with Payment Confirmed status
+    const confirmedBooking = { ...currentBooking, status: 'Payment Confirmed', paidAt: istTimestamp() };
+    postToSheets(confirmedBooking);
+
+    // Show final confirmation screen
+    setTimeout(() => {
+      document.getElementById('success-section').style.display  = 'none';
+      document.getElementById('confirmed-section').style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 800);
   });
 </script>
 </body>
