@@ -405,11 +405,11 @@
         <span>👥</span>
         <span id="ticket-label">1 ticket</span>
       </div>
-      <span class="price-total" id="total-display">₹499</span>
+      <span class="price-total" id="total-display">₹449</span>
     </div>
 
     <button class="cta-btn" id="cta-btn">
-      Book Now — ₹<span id="cta-price">499</span>
+      Book Now — ₹<span id="cta-price">449</span>
     </button>
 
   </section>
@@ -424,22 +424,14 @@
     <!-- UPI Payment — shown first -->
     <div class="upi-section">
       <p class="upi-heading">Complete your payment</p>
-      <div class="upi-grid">
+      <div class="upi-grid" style="grid-template-columns: 1fr; max-width: 160px; margin: 0 auto 12px;">
         <a class="upi-btn" id="upi-gpay" href="#" onclick="openUPI('gpay'); return false;">
-          <span class="upi-btn-icon">🟢</span>
+          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/120px-Google_Pay_Logo.svg.png" alt="GPay" style="height:28px; object-fit:contain;">
           <span class="upi-btn-label">GPay</span>
-        </a>
-        <a class="upi-btn" id="upi-phonepe" href="#" onclick="openUPI('phonepe'); return false;">
-          <span class="upi-btn-icon">🟣</span>
-          <span class="upi-btn-label">PhonePe</span>
-        </a>
-        <a class="upi-btn" id="upi-paytm" href="#" onclick="openUPI('paytm'); return false;">
-          <span class="upi-btn-icon">🔵</span>
-          <span class="upi-btn-label">Paytm</span>
         </a>
       </div>
       <button class="upi-any-btn" onclick="openUPI('any')">Pay with any UPI app →</button>
-      <p class="upi-note">Send payment to <strong>YOUR_UPI_ID@bank</strong> with reference <span id="booking-ref-note"></span></p>
+      <p class="upi-note">Send payment to <strong>kartikshanbhag@oksbi</strong> with reference <span id="booking-ref-note"></span></p>
     </div>
 
     <!-- I've Paid button -->
@@ -475,8 +467,8 @@
   //  CONFIG — update these values before going live
   // ═══════════════════════════════════════════════════════
   const CONFIG = {
-    TICKET_PRICE:      499,               // ₹ per ticket
-    UPI_ID:            'YOUR_UPI_ID@bank', // e.g. kartik@okicici
+    TICKET_PRICE:      449,
+    UPI_ID:            'kartikshanbhag@oksbi',
     UPI_NAME:          'Mobius Trip',
     EVENT_NAME:        'Mobius Trip — April 4, Kadaigal Books',
     GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzHbu5c5NEYQmRPZ8DLb97qo0Fp9umQc26j-WknM7xpA11B8BTScjrhSQ2e2BNitIUs/exec',
