@@ -729,11 +729,14 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  /* ── I've Paid button — just shows final confirmation screen ── */
+  /* ── I've Paid button — updates Sheet to Paid + shows final screen ── */
   document.getElementById('paid-btn').addEventListener('click', () => {
     const btn = document.getElementById('paid-btn');
     btn.disabled  = true;
     btn.innerHTML = '<span class="spinner"></span>Confirming...';
+
+    // Post updated status to Sheets
+    postToSheets({ ...currentBooking, status: 'Paid', paidAt: istTimestamp() });
 
     setTimeout(() => {
       document.getElementById('success-section').style.display  = 'none';
