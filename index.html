@@ -654,11 +654,16 @@
   /* ── Fetch current ticket count from Sheets ── */
   async function fetchTicketCount() {
     try {
-      const res  = await fetch(CONFIG.GOOGLE_SCRIPT_URL + '?action=count');
-      const data = await res.json();
+      const res  = await fetch(CONFIG.GOOGLE_SCRIPT_URL, {
+        method: 'GET',
+        redirect: 'follow',
+      });
+      const text = await res.text();
+      const data = JSON.parse(text);
       ticketsSold = parseInt(data.count) || 0;
     } catch (e) {
-      ticketsSold = 0; // fallback to early bird if fetch fails
+      console.warn('Could not fetch ticket count, defaulting to 0:', e);
+      ticketsSold = 0;
     }
     applyAvailabilityState();
   }
