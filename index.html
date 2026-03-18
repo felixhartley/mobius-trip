@@ -417,12 +417,25 @@
         <span>👥</span>
         <span id="ticket-label">1 ticket</span>
       </div>
-      <span class="price-total" id="total-display">₹449</span>
+      <div style="text-align:right;">
+        <div id="price-tag" style="font-size:11px; color:var(--accent); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:3px; display:none;"></div>
+        <span class="price-total" id="total-display">₹399</span>
+      </div>
+    </div>
+
+    <div id="filling-fast-note" style="display:none; text-align:center; font-size:13px; color:#e8a23a; font-weight:500; padding:10px 0 4px; letter-spacing:0.02em;">
+      🔥 Filling Fast — Last few seats remaining
     </div>
 
     <button class="cta-btn" id="cta-btn">
-      Book Now — ₹<span id="cta-price">449</span>
+      Book Now — ₹<span id="cta-price">399</span>
     </button>
+
+    <!-- Sold out state -->
+    <div id="sold-out-box" style="display:none; text-align:center; padding:22px 0;">
+      <div style="font-size:15px; font-weight:600; color:var(--text); margin-bottom:6px;">Bookings Closed</div>
+      <div style="font-size:13px; color:var(--text-secondary);">All seats have been filled. See you at the show!</div>
+    </div>
 
   </section>
 
@@ -479,14 +492,18 @@
   //  CONFIG — update these values before going live
   // ═══════════════════════════════════════════════════════
   const CONFIG = {
+    EARLY_BIRD_PRICE:  399,
+    EARLY_BIRD_LIMIT:  8,
     TICKET_PRICE:      449,
+    TOTAL_SEATS:       40,
+    FILLING_FAST_AT:   30,
     UPI_ID:            'kartikshanbhag@oksbi',
     UPI_NAME:          'Mobius Trip',
-    EVENT_NAME:        'Mobius Trip — April 4, Kadaigal Books',
+    EVENT_NAME:        'Mobius Trip — April 4, Kadhaigal',
     GOOGLE_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzWrwY3EdJu8oVakBOYyX0wTyT_w78SIYv5DrfhQy7a3vKtvw9GRhPCp22rmEvwzHNt/exec',
     EMAILJS_SERVICE:   'service_ywnl06p',
     EMAILJS_TEMPLATE:  'template_02wef8f',
-    ORGANISER_EMAIL:   'YOUR_EMAIL@example.com', // receives a BCC
+    ORGANISER_EMAIL:   'YOUR_EMAIL@example.com',
   };
   // ═══════════════════════════════════════════════════════
 
@@ -572,8 +589,9 @@
     return 'MT-' + Math.random().toString(36).substr(2,5).toUpperCase();
   }
 
-  /* ── Ticket counter ── */
-  const PRICE = CONFIG.TICKET_PRICE;
+  /* ── Ticket counter + dynamic pricing ── */
+  let ticketsSold = 0; // fetched from Sheets on load
+  let PRICE = CONFIG.EARLY_BIRD_PRICE; // default, updated after fetch
   let qty = 1;
 
   const btnDec  = document.getElementById('btn-dec');
@@ -582,19 +600,77 @@
   const labelEl = document.getElementById('ticket-label');
   const totalEl = document.getElementById('total-display');
   const ctaPrice= document.getElementById('cta-price');
+  const priceTag= document.getElementById('price-tag');
+
+  function getActivePrice() {
+    return ticketsSold < CONFIG.EARLY_BIRD_LIMIT
+      ? CONFIG.EARLY_BIRD_PRICE
+      : CONFIG.TICKET_PRICE;
+  }
 
   function updateCounter() {
+    PRICE = getActivePrice();
     countEl.textContent = qty;
     labelEl.textContent = qty === 1 ? '1 ticket' : `${qty} tickets`;
     const total = qty * PRICE;
     totalEl.textContent = `₹${fmt(total)}`;
     ctaPrice.textContent = fmt(total);
     btnDec.disabled = qty <= 1;
-    btnInc.disabled = qty >= 10;
+
+    // Cap qty at remaining seats
+    const remaining = CONFIG.TOTAL_SEATS - ticketsSold;
+    btnInc.disabled = qty >= Math.min(10, remaining);
+
+    // Show early bird tag
+    if (ticketsSold < CONFIG.EARLY_BIRD_LIMIT) {
+      priceTag.textContent = '🎟 Early Bird';
+      priceTag.style.display = 'block';
+    } else {
+      priceTag.style.display = 'none';
+    }
   }
 
+  function applyAvailabilityState() {
+    const remaining = CONFIG.TOTAL_SEATS - ticketsSold;
+
+    // Sold out
+    if (remaining <= 0) {
+      document.getElementById('cta-btn').style.display   = 'none';
+      document.getElementById('sold-out-box').style.display = 'block';
+      document.getElementById('filling-fast-note').style.display = 'none';
+      document.getElementById('btn-dec').disabled = true;
+      document.getElementById('btn-inc').disabled = true;
+      return;
+    }
+
+    // Filling fast
+    if (ticketsSold >= CONFIG.FILLING_FAST_AT) {
+      document.getElementById('filling-fast-note').style.display = 'block';
+    }
+
+    updateCounter();
+  }
+
+  /* ── Fetch current ticket count from Sheets ── */
+  async function fetchTicketCount() {
+    try {
+      const res  = await fetch(CONFIG.GOOGLE_SCRIPT_URL + '?action=count');
+      const data = await res.json();
+      ticketsSold = parseInt(data.count) || 0;
+    } catch (e) {
+      ticketsSold = 0; // fallback to early bird if fetch fails
+    }
+    applyAvailabilityState();
+  }
+
+  fetchTicketCount();
+
   btnDec.addEventListener('click', () => { qty = Math.max(1, qty - 1); updateCounter(); });
-  btnInc.addEventListener('click', () => { qty = Math.min(10, qty + 1); updateCounter(); });
+  btnInc.addEventListener('click', () => {
+    const remaining = CONFIG.TOTAL_SEATS - ticketsSold;
+    qty = Math.min(Math.min(10, remaining), qty + 1);
+    updateCounter();
+  });
 
   /* ── Validation ── */
   function setError(inputId, errId, show) {
@@ -693,7 +769,7 @@
     const name  = document.getElementById('inp-name').value.trim();
     const phone = document.getElementById('inp-phone').value.trim();
     const email = document.getElementById('inp-email').value.trim();
-    const total = qty * PRICE;
+    const total = qty * getActivePrice();
     const bId   = bookingId();
 
     btn.disabled  = true;
