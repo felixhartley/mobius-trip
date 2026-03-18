@@ -431,11 +431,15 @@
       Book Now — ₹<span id="cta-price">399</span>
     </button>
 
-    <!-- Sold out state -->
-    <div id="sold-out-box" style="display:none; text-align:center; padding:22px 0;">
-      <div style="font-size:15px; font-weight:600; color:var(--text); margin-bottom:6px;">Bookings Closed</div>
-      <div style="font-size:13px; color:var(--text-secondary);">All seats have been filled. See you at the show!</div>
-    </div>
+  </section>
+
+  <!-- Sold out state — outside form so it shows when form is hidden -->
+  <div id="sold-out-box" style="display:none; text-align:center; padding:22px 0;">
+    <div style="font-size:15px; font-weight:600; color:var(--text); margin-bottom:6px;">Bookings Closed</div>
+    <div style="font-size:13px; color:var(--text-secondary);">All seats have been filled. See you at the show!</div>
+  </div>
+
+  </div><!-- /pre-booking -->
 
   </section>
 
@@ -635,11 +639,13 @@
 
     // Sold out
     if (remaining <= 0) {
-      document.getElementById('cta-btn').style.display   = 'none';
-      document.getElementById('sold-out-box').style.display = 'block';
+      document.getElementById('cta-btn').style.display        = 'none';
+      document.getElementById('sold-out-box').style.display   = 'block';
       document.getElementById('filling-fast-note').style.display = 'none';
-      document.getElementById('btn-dec').disabled = true;
-      document.getElementById('btn-inc').disabled = true;
+      document.getElementById('btn-dec').disabled             = true;
+      document.getElementById('btn-inc').disabled             = true;
+      // Hide the entire form including heading and fields
+      document.querySelector('.form-section').style.display   = 'none';
       return;
     }
 
