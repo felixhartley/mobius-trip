@@ -453,8 +453,13 @@
     <!-- QR Code Payment -->
     <div class="upi-section">
       <p class="upi-heading">Scan to pay</p>
-      <div style="display:flex; justify-content:center; margin-bottom:16px;">
+      <div style="display:flex; justify-content:center; margin-bottom:12px;">
         <img src="qr_code.png" alt="Scan to pay" style="width:220px; height:220px; object-fit:contain; border-radius:12px;">
+      </div>
+      <div style="display:flex; justify-content:center; margin-bottom:16px;">
+        <a href="qr_code.png" download="MobiusTrip_Payment_QR.png" style="display:inline-flex; align-items:center; gap:7px; padding:11px 20px; background:var(--card); border:1px solid var(--border); border-radius:10px; color:var(--text-secondary); font-size:13px; font-weight:500; text-decoration:none; transition:all 0.18s;">
+          ⬇️ Download QR Code
+        </a>
       </div>
       <p class="upi-note">Open any UPI app · Scan the QR · Enter amount · Use reference <span id="booking-ref-note"></span></p>
     </div>
@@ -795,8 +800,8 @@
     // Record to Google Sheets immediately on Book Now
     postToSheets(currentBooking);
 
-    // Send confirmation email
-    sendConfirmationEmail(currentBooking);
+    // Send confirmation email — paused for testing
+    // sendConfirmationEmail(currentBooking);
 
     // Store for UPI
     currentBookingTotal = total;
