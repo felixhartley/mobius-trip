@@ -450,17 +450,13 @@
     <h2 class="success-title">You're on the trip!</h2>
     <p class="success-subtitle">Your booking is confirmed. Complete the payment below to secure your seat.</p>
 
-    <!-- UPI Payment — shown first -->
+    <!-- QR Code Payment -->
     <div class="upi-section">
-      <p class="upi-heading">Complete your payment</p>
-      <div class="upi-grid" style="grid-template-columns: 1fr; max-width: 160px; margin: 0 auto 12px;">
-        <a class="upi-btn" id="upi-gpay" href="#" onclick="openUPI('gpay'); return false;">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/120px-Google_Pay_Logo.svg.png" alt="GPay" style="height:28px; object-fit:contain;">
-          <span class="upi-btn-label">GPay</span>
-        </a>
+      <p class="upi-heading">Scan to pay</p>
+      <div style="display:flex; justify-content:center; margin-bottom:16px;">
+        <img src="qr_code.png" alt="Scan to pay" style="width:220px; height:220px; object-fit:contain; border-radius:12px;">
       </div>
-      <button class="upi-any-btn" onclick="openUPI('any')">Pay with any UPI app →</button>
-      <p class="upi-note">Send payment to <strong>kartikshanbhag@oksbi</strong> with reference <span id="booking-ref-note"></span></p>
+      <p class="upi-note">Open any UPI app · Scan the QR · Enter amount · Use reference <span id="booking-ref-note"></span></p>
     </div>
 
     <!-- I've Paid button -->
