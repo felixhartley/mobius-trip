@@ -804,8 +804,8 @@
     // Record to Google Sheets immediately on Book Now
     postToSheets(currentBooking);
 
-    // Send confirmation email — paused for testing
-    // sendConfirmationEmail(currentBooking);
+    // Send confirmation email
+    sendConfirmationEmail(currentBooking);
 
     // Store for UPI
     currentBookingTotal = total;
